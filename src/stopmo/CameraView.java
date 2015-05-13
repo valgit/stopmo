@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -22,6 +23,13 @@ public class CameraView extends JPanel  implements CameraModelListener {
 	private BufferedImage currentShot; 
 
 	CameraView() {
+		/*
+		  JButton takeShotBtn = new JButton("Shot");	
+		  
+	      setLayout(new BoxLayout(inputPanel, BoxLayout.LINE_AXIS));
+	      add(inputField);
+	      add(takeShotBtn);
+	      */
 		currentShot = null;
 		camera = null;
 		// TODO: create snap button
