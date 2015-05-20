@@ -14,9 +14,13 @@ public class WorkerRunnable implements Runnable {
 	protected Socket clientSocket = null;
 	protected String serverText   = null;
 
-	public WorkerRunnable(Socket clientSocket, String serverText) {
+	private CamSocketServerListener controller;
+	
+	public WorkerRunnable(Socket clientSocket, String serverText,CamSocketServerListener controller) {
 		this.clientSocket = clientSocket;
 		this.serverText   = serverText;
+		
+		controller.addCamera(this);
 	}
 
 	@Override

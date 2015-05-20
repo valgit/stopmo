@@ -4,7 +4,6 @@ package stopmo;
  * socket server for Camera Remote
  * create a new worker on connection
  * this should replace the websocket one !
- * 
  * should be instantiate like this :
  * MultiThreadedServer server = new MultiThreadedServer(9000);
  * new Thread(server).start();
@@ -20,6 +19,9 @@ package stopmo;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.io.IOException;
 
 public class MultiThreadedServer implements Runnable {
@@ -29,8 +31,16 @@ public class MultiThreadedServer implements Runnable {
 	protected boolean      isStopped    = false;
 	protected Thread       runningThread= null;
 
-	public MultiThreadedServer(int port){
+	private Set<Socket> conns;
+	private Map<Socket, CameraModel> cameras;
+	private CamSocketServerListener controller;		
+	
+	public MultiThreadedServer(int port, CamSocketServerListener listener){		
+		System.out.println("MultiThreadedServer created");
 		serverPort = port;
+	    conns = new HashSet<>();
+	    //cameras = new HashMap<>();
+	    controller = listener;
 	}
 
 	@Override
@@ -51,10 +61,19 @@ public class MultiThreadedServer implements Runnable {
 				throw new RuntimeException(
 						"Error accepting client connection", e);
 			}
+			conns.add(clientSocket);	
+			CameraModel camera = new CameraModel(clientSocket);
+		    cameras.put(clientSocket, camera);
+		    controller.addCamera(camera);
+		    Thread camThread = new Thread(camera);
+		    camThread.start();
+		    //TODO: maybe store the thread id ?
+		    /*
 			new Thread(
 					new WorkerRunnable(
-							clientSocket, "Multithreaded Server")
+							clientSocket, "Multithreaded Server",controller)
 					).start();
+					*/
 		}
 		System.out.println("Server Stopped.") ;
 	}

@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +14,15 @@ import javax.imageio.ImageIO;
 
 import org.java_websocket.WebSocket;
 
-public class CameraModel {
-	private WebSocket conn;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+public class CameraModel implements Runnable {
+	protected Socket clientSocket = null;
+	protected String serverText   = null;
+	//private WebSocket conn;
 	private String model;
 	private List<String> WhiteBalanceList;
 	private int state;
@@ -23,11 +32,33 @@ public class CameraModel {
 	private int width;
 	private int height;
 
-	public CameraModel(WebSocket conn) {
+	public CameraModel(Socket clientSocket) {
 		super();
-		this.conn = conn;
+		this.clientSocket = clientSocket;
 		state = 0;
 	}
+
+	
+
+	@Override
+	public void run() {
+		try {
+			InputStream input  = clientSocket.getInputStream();
+			OutputStream output = clientSocket.getOutputStream();
+			long time = System.currentTimeMillis();
+			output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
+					this.serverText + " - " +
+					time +
+					"").getBytes());
+			output.close();
+			input.close();
+			System.out.println("Request processed: " + time);
+		} catch (IOException e) {
+			//report exception somewhere.
+			e.printStackTrace();
+		}
+	}
+}
 
 	public void parseMessage(String msg) {		
 		if (msg.startsWith("hello")) {

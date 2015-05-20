@@ -12,8 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.InetSocketAddress;
-
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -34,7 +32,8 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 	static boolean initialized;
 	private CameraView cameraview;
 
-	private CamSocketServer server;
+	//private CamSocketServer wsserver;
+	private MultiThreadedServer server;
 
 	public stopmo() throws HeadlessException {
 		super("stopmo");
@@ -117,8 +116,13 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		setContentPane(pane);
 
 		// create websocket server 		
-		server = new CamSocketServer(new InetSocketAddress("10.24.244.99",5000),5000,this);
-		server.start();
+		//wsserver = new CamSocketServer(new InetSocketAddress("10.24.244.99",5000),5000,this);
+		//wsserver.start();
+		
+		// create standard server
+		server = new MultiThreadedServer(9000,this);
+		new Thread(server).start();
+		 
 		initialized = true;
 	}
 
