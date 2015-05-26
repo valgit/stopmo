@@ -1,5 +1,6 @@
 package stopmo;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,32 +33,36 @@ public class CameraModel {
 	public void parseMessage(String msg) {		
 		if (msg.startsWith("hello")) {
 			model = msg.split(":",2)[1];
-		} 
-		if (msg.startsWith("PSize")) {
-			getPreviewSize(msg);
-		}
-		if (msg.startsWith("Shot")) {
-			System.out.println("new shot");
-			state = 2;
-		}
-		if (msg.startsWith("Balance")) {
-			parseBalance(msg);
-		} 
-		if (msg.startsWith("Preview")) {
-			System.out.println("new preview");
-			state = 1;
-		} 
-		System.out.println("parseMessage: " + msg);
+		} else
+			if (msg.startsWith("PSize")) {
+				setPreviewSize(msg);
+			} else
+				if (msg.startsWith("Shot")) {
+					//System.out.println("new shot");
+					state = 2;
+				} else
+					if (msg.startsWith("Balance")) {
+						parseBalance(msg);
+					} else
+						if (msg.startsWith("Preview")) {
+							//System.out.println("new preview");
+							state = 1;
+						} else
+							System.out.println("parseMessage: " + msg);
 	}
 
 	/*
 	 * camera send preview as w,h
 	 */
-	private void getPreviewSize(String msg) {
+	private void setPreviewSize(String msg) {
 		String blist = msg.split(":",2)[1];
 		String[] slist = blist.split("\\s*,\\s*");
 		width = Integer.parseInt(slist[0]);
 		height = Integer.parseInt(slist[1]);
+		if (listener != null) {
+			Dimension psize = new Dimension(width,height);
+			listener.onPreviewSize(psize);
+		}
 	}
 
 	/*
@@ -74,24 +79,46 @@ public class CameraModel {
 	}
 
 	public void parseMessage( ByteBuffer message ) {
-		System.out.println("parseMessage: bytes" );
-
 		if (state == 2) {
 			System.out.println("parseMessage: in shot" );
+			/*
 			try {
+				
 				InputStream in = new ByteArrayInputStream(message.array());
 				BufferedImage img = ImageIO.read(in);
 
 				if (listener != null)
 					listener.onShot(img);
-
+				
+				
+				
 			} catch (IOException e) {			
 				e.printStackTrace();
-			}
+			} */
+			if (listener != null)
+				listener.onShot(message.array());
+			
 		} else if (state == 1) {
-			System.out.println("parseMessage: in preview ("+width+","+height+")" );
-
-			//YuvImage img = new YuvImage(message, ImageFormat.NV21, PreviewSizeWidth, PreviewSizeHeight, null);
+			//System.out.println("parseMessage: in preview ("+width+","+height+")" );
+			// test encoding in phone?			
+			try {
+				InputStream in = new ByteArrayInputStream(message.array());
+				BufferedImage img = ImageIO.read(in);
+				
+				/* 
+				int width = img.getWidth();
+				int height = img.getHeight();
+				System.out.println("onPreview: (jpg) size: "+width+" h: "+height);
+				*/
+				if (listener != null)
+					listener.onPreview(img);
+				
+			} catch (IOException e) {				
+				e.printStackTrace();
+			}
+						
+		} else {
+			System.out.println("parseMessage: unhandled bytes, state : " + state );
 		}
 	}
 

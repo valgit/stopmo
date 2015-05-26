@@ -12,8 +12,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -36,6 +43,8 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 
 	private CamSocketServer server;
 
+	private File projectdir= new File("d:\\work\\stopproj");
+	
 	public stopmo() throws HeadlessException {
 		super("stopmo");
 		initialize();
@@ -102,7 +111,7 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		JMenuBar menuBar = buildMenuBar();
 		setJMenuBar(menuBar);
 
-		cameraview = new CameraView();
+		cameraview = new CameraView(this);
 		cameraview.setPreferredSize(new Dimension(700,500));
 		/*
 		JScrollPane scroll = new JScrollPane(pageview);
@@ -139,7 +148,14 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		JMenuItem newMenuItem = new JMenuItem("New");
 		newMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				displayaction("new");
+				JFileChooser fileChooser = new JFileChooser();
+            	fileChooser.setDialogTitle("project directory");
+            	fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            	fileChooser.setAcceptAllFileFilterUsed(false);
+    			int returnValue = fileChooser.showOpenDialog(null);
+    			if (returnValue == JFileChooser.APPROVE_OPTION) {
+    				projectdir = fileChooser.getCurrentDirectory();
+    			}
 			}
 		});
 		fileMenu.add(newMenuItem);
@@ -266,4 +282,35 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		camera.detach(cameraview);
 		cameraview.setCamera(null);	
 	}
+	
+	private File getShotFile() {
+		//take the current timeStamp
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		File mediaFile;
+		
+		/* project dir */
+		mediaFile = new File(projectdir + File.separator + "DSC_" + timeStamp + ".jpg");
+		return mediaFile;
+	}
+
+	public void saveShot(byte[] shot) {
+		System.out.println("saveShot");
+		// save file
+		File outputfile = getShotFile();
+		FileOutputStream stream = null;
+		try {
+			stream = new FileOutputStream(outputfile);
+		} catch (FileNotFoundException e) {		
+			e.printStackTrace();
+		}
+		try {
+			stream.write(shot);
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+
+		System.out.println("saveShot: save in" + outputfile.getAbsolutePath());
+	}
+	
 }
