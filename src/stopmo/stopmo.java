@@ -42,23 +42,11 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	public stopmo(GraphicsConfiguration arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public stopmo(String arg0) throws HeadlessException {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public stopmo(String arg0, GraphicsConfiguration arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
 	public static void main(String[] args) {
 		initialized = false;
+		//TODO: remove
+		DebugStream.activate(); // debugging output
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (UnsupportedLookAndFeelException ex) {

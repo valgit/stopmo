@@ -19,6 +19,7 @@ package stopmo;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,10 +37,10 @@ public class MultiThreadedServer implements Runnable {
 	private CamSocketServerListener controller;		
 	
 	public MultiThreadedServer(int port, CamSocketServerListener listener){		
-		System.out.println("MultiThreadedServer created");
+		System.out.println("MultiThreadedServer created on port : " + port);
 		serverPort = port;
 	    conns = new HashSet<>();
-	    //cameras = new HashMap<>();
+	    cameras = new HashMap<>();
 	    controller = listener;
 	}
 

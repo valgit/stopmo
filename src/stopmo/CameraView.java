@@ -1,6 +1,8 @@
 package stopmo;
 
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -23,19 +25,22 @@ public class CameraView extends JPanel  implements CameraModelListener {
 	private BufferedImage currentShot; 
 
 	CameraView() {
-		/*
+		
 		  JButton takeShotBtn = new JButton("Shot");	
-		  
-	      setLayout(new BoxLayout(inputPanel, BoxLayout.LINE_AXIS));
-	      add(inputField);
+		  takeShotBtn.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (camera != null)
+						camera.takeShot();
+				}
+			});	   
+	    
 	      add(takeShotBtn);
-	      */
+	      
 		currentShot = null;
 		camera = null;
 		// TODO: create snap button
 	}
-	public void paintComponent(Graphics g){	
-		//System.out.println("Je suis exécutée !"); 
+	public void paintComponent(Graphics g){			
 		//g.fillOval(20, 20, 75, 75);		
 		if (currentShot != null) {
 			System.out.println("currentShot");

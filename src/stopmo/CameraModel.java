@@ -2,6 +2,8 @@ package stopmo;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,7 +23,9 @@ import java.net.Socket;
 
 public class CameraModel implements Runnable {
 	protected Socket clientSocket = null;
-	protected String serverText   = null;
+	private DataInputStream dIn;
+	private DataOutputStream dOs;
+
 	//private WebSocket conn;
 	private String model;
 	private List<String> WhiteBalanceList;
@@ -31,27 +35,59 @@ public class CameraModel implements Runnable {
 	private CameraModelListener listener;
 	private int width;
 	private int height;
-
+	
+	
 	public CameraModel(Socket clientSocket) {
 		super();
 		this.clientSocket = clientSocket;
 		state = 0;
+		try {
+			dIn = new DataInputStream(clientSocket.getInputStream());
+			dOs = new DataOutputStream(clientSocket.getOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 
 	@Override
 	public void run() {
 		try {
-			InputStream input  = clientSocket.getInputStream();
-			OutputStream output = clientSocket.getOutputStream();
-			long time = System.currentTimeMillis();
-			output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
+			//TODO: 
+				
+			//BufferedReader reader = new BufferedReader( new InputStreamReader( clientSocket.getInputStream() ) );
+			
+			
+			//InputStream input  = clientSocket.getInputStream();
+			//OutputStream output = clientSocket.getOutputStream();
+			//TOD ?
+			while (true) {
+				/*
+				String line = this.socketIn.readLine();
+				long time = System.currentTimeMillis();
+				output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
 					this.serverText + " - " +
 					time +
 					"").getBytes());
-			output.close();
-			input.close();
-			System.out.println("Request processed: " + time);
+				output.close();
+				input.close();
+				System.out.println("Request processed: " + time);
+				*/
+				//char ch = (char) reader.read();
+				
+				char type = (char) dIn.readByte();
+ 				int length = dIn.readInt();                    // read length of incoming message
+ 				System.out.println("will read type "+ type + "of len : "+length);
+				if(length>0) {
+					byte[] message = new byte[length];
+					dIn.readFully(message, 0, message.length); // read the message
+					// do something with it !
+					System.out.println("read " + length + "bytes");
+				}				
+				// ???
+				System.out.println("nothing read ?");
+			} // while
 		} catch (IOException e) {
 			//report exception somewhere.
 			e.printStackTrace();
@@ -125,9 +161,17 @@ public void parseMessage( ByteBuffer message ) {
 }
 
 public void takeShot() {
-	System.out.println("take shot");
-	//TODO: use socket here !
-	//conn.send("takeShot");
+	System.out.println("take shot");	
+	try {
+		// should be TLV !!
+		//os.write("takeShot".getBytes());
+		//dOs.writeChar(0x0053); // "S"
+		dOs.writeChar('S'); 
+		dOs.writeLong(0L);		
+		
+	} catch (IOException e) {		
+		e.printStackTrace();
+	}
 }
 
 public String getModel() {
