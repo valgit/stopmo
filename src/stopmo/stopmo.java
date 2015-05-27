@@ -108,7 +108,7 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		//wsserver.start();
 		
 		// create standard server
-		server = new MultiThreadedServer(9000,this);
+		server = new MultiThreadedServer(5000,this);
 		new Thread(server).start();
 		 
 		initialized = true;

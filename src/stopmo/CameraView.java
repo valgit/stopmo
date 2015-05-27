@@ -70,6 +70,7 @@ public class CameraView extends JPanel  implements CameraModelListener {
 	
 	public void setCamera(CameraModel camera) {
 		this.camera = camera;		
+		System.out.println("attaching new camera :" + camera.getModel());
 	}
 
 }
