@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -47,6 +46,8 @@ public class CameraView extends JPanel  implements CameraModelListener {
 
 	private Dimension scaled;
 
+	private long timestamp=0;
+	
 	/*
 	 * calculate the correct ratio for preview display
 	 */
@@ -153,6 +154,15 @@ public class CameraView extends JPanel  implements CameraModelListener {
 		g2d.setComposite(originalComposite);
 	}  
 
+	private BufferedImage getScaledImage(BufferedImage src){
+		BufferedImage resizedImg = new BufferedImage(scaled.width,scaled.height, BufferedImage.TRANSLUCENT);
+	    Graphics2D g2 = resizedImg.createGraphics();
+	    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	    g2.drawImage(src, 0, 0, scaled.width,scaled.height, null);
+	    g2.dispose();
+	    return resizedImg;
+	}
+	
 	@Override
 	public void onShot(byte[] img) {		
 		if (project != null)
@@ -161,7 +171,9 @@ public class CameraView extends JPanel  implements CameraModelListener {
 		// convert to image for display
 		InputStream in = new ByteArrayInputStream(img);
 		try {
-			lastShot = ImageIO.read(in);
+			// store a small version for preview
+			BufferedImage fulllastShot = ImageIO.read(in);
+			lastShot = getScaledImage(fulllastShot);
 		} catch (IOException e) {			
 			e.printStackTrace();
 		}		
@@ -170,7 +182,9 @@ public class CameraView extends JPanel  implements CameraModelListener {
 
 	@Override
 	public void onPreview(BufferedImage img) {
-		// TODO Auto-generated method stub
+		System.out.println("onPreview Time Gap = "+(System.currentTimeMillis()-timestamp));
+		timestamp=System.currentTimeMillis();
+		
 		previewFrame = img;
 		repaint();
 
