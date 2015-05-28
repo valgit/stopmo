@@ -6,20 +6,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-
-import org.java_websocket.WebSocket;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.net.Socket;
 
 public class CameraModel implements Runnable {
 	protected Socket clientSocket = null;
@@ -45,7 +38,6 @@ public class CameraModel implements Runnable {
 			dIn = new DataInputStream(clientSocket.getInputStream());
 			dOs = new DataOutputStream(clientSocket.getOutputStream());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -85,11 +77,14 @@ public class CameraModel implements Runnable {
 					// do something with it !
 					//System.out.println("read " + length + "bytes");
 					parseMessage(type,length,message);
-				}				
-				// ???
-				System.out.println("nothing read ?");
+				} else {			
+					// ???
+					System.out.println("nothing read ?");
+				}
 			} // while
-		} catch (IOException e) {
+		}  catch (SocketException e) {
+			System.out.println("socket : "+ e.getMessage());
+		}catch (IOException e) {
 			//report exception somewhere.
 			e.printStackTrace();
 		}
@@ -98,10 +93,10 @@ public class CameraModel implements Runnable {
 	private void parseMessage(char type, int length, byte[] message) {		
 		switch (type) {
 		case 'H' : // hello
-			model = new String(message).split(":",2)[1];
+			model = new String(message);
 			break;
 		case 'S' : // shot
-			System.out.println("new shot");
+			System.out.println("new shot (jpeg size " + length + ")");
 			state = 2;
 			break;
 		case 'P' : // preview
@@ -114,6 +109,8 @@ public class CameraModel implements Runnable {
 		case 'T' : // preview size
 			getPreviewSize(new String(message));
 			break;
+		case 'Q' : // quit !
+			break;
 		default:
 			System.out.println("parseMessage of type :" + type + " with len " + length);
 		}	 		
@@ -123,8 +120,8 @@ public class CameraModel implements Runnable {
 	 * camera send preview as w,h
 	 */
 	private void getPreviewSize(String msg) {
-		String blist = msg.split(":",2)[1];
-		String[] slist = blist.split("\\s*,\\s*");
+		//String blist = msg.split(":",2)[1];
+		String[] slist = msg.split("\\s*,\\s*");
 		width = Integer.parseInt(slist[0]);
 		height = Integer.parseInt(slist[1]);
 	}
@@ -134,8 +131,8 @@ public class CameraModel implements Runnable {
 	 * store it
 	 */
 	private void parseBalance(String msg) {
-		String blist = msg.split(":",2)[1];
-		WhiteBalanceList = Arrays.asList(blist.split("\\s*,\\s*"));		
+		//String blist = msg.split(":",2)[1];
+		WhiteBalanceList = Arrays.asList(msg.split("\\s*,\\s*"));		
 	}
 
 	public List<String> getWhiteBalanceList() {
