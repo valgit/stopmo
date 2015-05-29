@@ -12,15 +12,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.JFileChooser;
+
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -41,7 +42,8 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 	static boolean initialized;
 	private CameraView cameraview;
 
-	private CamSocketServer server;
+	//private CamSocketServer wsserver;
+	private MultiThreadedServer server;
 
 	private File projectdir= new File("d:\\work\\stopproj");
 	
@@ -52,35 +54,20 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
-	public stopmo(GraphicsConfiguration arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public stopmo(String arg0) throws HeadlessException {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public stopmo(String arg0, GraphicsConfiguration arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
 	public static void main(String[] args) {
 		initialized = false;
+		//TODO: remove
+		DebugStream.activate(); // debugging output
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (UnsupportedLookAndFeelException ex) {
 			System.out.println("Unable to load native look and feel");
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		SwingUtilities.invokeLater(new Runnable() {
@@ -124,10 +111,11 @@ public class stopmo extends JFrame implements CamSocketServerListener {
 		pane.add("Center", cameraview);
 
 		setContentPane(pane);
-
-		// create websocket server 		
-		server = new CamSocketServer(new InetSocketAddress("10.24.244.99",5000),5000,this);
-		server.start();
+			
+		// create standard server
+		server = new MultiThreadedServer(5000,this);
+		new Thread(server).start();
+		 
 		initialized = true;
 	}
 

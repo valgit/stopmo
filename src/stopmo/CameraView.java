@@ -33,9 +33,8 @@ public class CameraView extends JPanel  implements CameraModelListener {
 	private stopmo project;
 
 	private CameraModel camera;
-	private CamSocketServer server;
 
-	private JButton snap;
+	private JButton takeShotBtn;
 
 	private BufferedImage previewFrame; 
 	private BufferedImage lastShot;
@@ -74,8 +73,7 @@ public class CameraView extends JPanel  implements CameraModelListener {
 	}
 
 	CameraView(stopmo stopmo) {
-
-		JButton takeShotBtn = new JButton("Shot");
+		takeShotBtn = new JButton("Shot");
 		takeShotBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (camera != null)
@@ -84,11 +82,6 @@ public class CameraView extends JPanel  implements CameraModelListener {
 		});		
 		add(takeShotBtn);
 		
-		/*
-	      setLayout(new BoxLayout(inputPanel, BoxLayout.LINE_AXIS));
-	      add(inputField);
-
-		 */		
 		camera = null;
 
 		lastShot = null;
@@ -96,9 +89,9 @@ public class CameraView extends JPanel  implements CameraModelListener {
 
 		//TODO:
 		project = stopmo;
-
 	}
 
+	@Override
 	public void paintComponent(Graphics g){	
 		Graphics2D g2d = (Graphics2D) g;		
 
@@ -192,6 +185,7 @@ public class CameraView extends JPanel  implements CameraModelListener {
 
 	public void setCamera(CameraModel camera) {
 		this.camera = camera;		
+		//System.out.println("attaching new camera :" + camera.getModel());
 	}
 
 	@Override
