@@ -23,7 +23,7 @@ public class CameraModel implements Runnable {
 	//private WebSocket conn;
 	private String model;
 	private List<String> WhiteBalanceList;
-	private int state;
+	//private int state;
 
 	// should be a set ?
 	private CameraModelListener listener;
@@ -34,7 +34,7 @@ public class CameraModel implements Runnable {
 	public CameraModel(Socket clientSocket) {
 		super();
 		this.clientSocket = clientSocket;
-		state = 0;
+		//state = 0;
 		try {
 			dIn = new DataInputStream(clientSocket.getInputStream());
 			dOs = new DataOutputStream(clientSocket.getOutputStream());
@@ -97,11 +97,29 @@ public class CameraModel implements Runnable {
 			break;
 		case 'S' : // shot
 			System.out.println("new shot (jpeg size " + length + ")");
-			state = 2;
+			//state = 2;
+			if (listener != null)
+				listener.onShot(message);
+			
 			break;
 		case 'P' : // preview
 			System.out.println("new preview");
-			state = 1;
+			//state = 1;
+			try {
+				InputStream in = new ByteArrayInputStream(message);
+				BufferedImage img = ImageIO.read(in);
+				
+				/* 
+				int width = img.getWidth();
+				int height = img.getHeight();
+				System.out.println("onPreview: (jpg) size: "+width+" h: "+height);
+				*/
+				if (listener != null)
+					listener.onPreview(img);
+				
+			} catch (IOException e) {				
+				e.printStackTrace();
+			}
 			break;
 		case 'B' : // balance
 			parseBalance(new String(message));
@@ -144,49 +162,6 @@ public class CameraModel implements Runnable {
 		return WhiteBalanceList;
 	}
 
-	public void parseMessage( ByteBuffer message ) {
-		if (state == 2) {
-			System.out.println("parseMessage: in shot" );
-			/*
-			try {
-				
-				InputStream in = new ByteArrayInputStream(message.array());
-				BufferedImage img = ImageIO.read(in);
-
-				if (listener != null)
-					listener.onShot(img);
-				
-				
-				
-			} catch (IOException e) {			
-				e.printStackTrace();
-			} */
-			if (listener != null)
-				listener.onShot(message.array());
-			
-		} else if (state == 1) {
-			//System.out.println("parseMessage: in preview ("+width+","+height+")" );
-			// test encoding in phone?			
-			try {
-				InputStream in = new ByteArrayInputStream(message.array());
-				BufferedImage img = ImageIO.read(in);
-				
-				/* 
-				int width = img.getWidth();
-				int height = img.getHeight();
-				System.out.println("onPreview: (jpg) size: "+width+" h: "+height);
-				*/
-				if (listener != null)
-					listener.onPreview(img);
-				
-			} catch (IOException e) {				
-				e.printStackTrace();
-			}
-						
-		} else {
-			System.out.println("parseMessage: unhandled bytes, state : " + state );
-		}
-	}
 
 	public void takeShot() {
 		System.out.println("take shot");	
@@ -195,7 +170,7 @@ public class CameraModel implements Runnable {
 			//os.write("takeShot".getBytes());
 			//dOs.writeChar(0x0053); // "S"
 			dOs.writeChar('S'); 
-			dOs.writeLong(0L);		
+			dOs.writeInt(0);		
 
 		} catch (IOException e) {		
 			e.printStackTrace();
